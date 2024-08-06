@@ -48,8 +48,8 @@ This is a POC and not intended to be run full time.  There are some IAM policies
 5. terraform validate
 6. terraform apply
 7. View deployment in codepipeline
-8. **delete process** Approve stage in pipeline to destroy resources
-9. **delete process** terraform destroy
+8. **delete process**  - Approve stage in pipeline to destroy resources
+9. **delete process**  - terraform destroy
 
 ## Deployment Explanation
 1. terraform/start - Deploy codepipline that uses codebuild to deploy the infrastructure needed.  The build process installs terraform, deploys terraform/infrastructure to create ECR and VPC, then deploys the Dockerfile to ECR. Then the build will deploy terraform/container to deploy ECS.
@@ -59,7 +59,7 @@ This is a POC and not intended to be run full time.  There are some IAM policies
 ## Recreate self-signed certificate if needed
 1. cd terraform/container/modules/ecs/ssl
 2. openssl genrsa 2048 > privatekey.key
-3. openssl req -new -x509 -nodes -sha256 -days 365 -key privatekey.key -outform PEM -out certificate.crt ** Prompts for Certificate information like Country, State, Company, etc - https://docs.openssl.org/1.1.1/man1/x509/ **
+3. openssl req -new -x509 -nodes -sha256 -days 365 -key privatekey.key -outform PEM -out certificate.crt  -- **Prompts for Certificate information like Country, State, Company, etc - https://docs.openssl.org/1.1.1/man1/x509/**
 
 ## Improvements given more time
 1. Switch Codepipeline to use Github as source instead of S3 and fully implement a CI/CD process
