@@ -1,0 +1,39 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Install terraform application
+      - "cd /usr/bin"
+      - "curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/1.9.3/terraform_1.9.3_darwin_amd64.zip"
+      - "unzip -o terraform.zip"
+
+  pre_build:
+    commands:
+      - echo Check terraform version
+      - cd "$CODEBUILD_SRC_DIR"
+      - ls -al
+      - terraform -v
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Destroy Container via Terraform
+      - cd terraform/container
+      - terraform destroy -auto-approve -no-color
+      - cd "$CODEBUILD_SRC_DIR"
+
+      - echo Destroy infrastructure via Terraform
+      - cd terraform/infrastructure
+      - terraform destroy -auto-approve -no-color
+      - export ECR_URL=$(terraform output -raw ecr_url)
+      - export ECR_NAME=$(terraform output -raw ecr_name)
+
+
+  post_build:
+    commands:
+      - echo "Terraform destroyed on `date`"
+
+artifacts:
+  files:
+    - '**/*'

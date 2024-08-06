@@ -1,0 +1,6 @@
+aws_region      = "us-west-2"
+project_name    = "tasker-demo-auto"
+project_owner   = "Jason Tasker"
+allowed_cidr    = "99.32.72.96/32"
+base_cidr_block = "10.0.0.0/24"
+artifact_bucket = "tasker-demo-artifact"

@@ -1,0 +1,53 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Install terraform application
+      - "cd /usr/bin"
+      - "curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/1.9.3/terraform_1.9.3_darwin_amd64.zip"
+      - "unzip -o terraform.zip"
+
+  pre_build:
+    commands:
+      - echo Check terraform version
+      - cd "$CODEBUILD_SRC_DIR"
+      - ls -al
+      - terraform -v
+
+  build:
+    commands:
+      - echo Build started on `date`
+
+      - echo Deploying infrastructure via Terraform
+      - cd terraform/infrastructure
+      - terraform init -no-color
+      - terraform plan -no-color
+      - terraform apply -auto-approve -no-color
+      - export ECR_URL=$(terraform output -raw ecr_url)
+      - export ECR_NAME=$(terraform output -raw ecr_name)
+
+      - echo Logging in to Amazon ECR...
+      - cd "$CODEBUILD_SRC_DIR"
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - echo Building the Docker image...
+      - docker build -t $ECR_NAME:latest .
+      - docker tag $ECR_NAME:latest $ECR_URL:latest
+
+  post_build:
+    commands:
+      - echo Pushing the Docker image...
+      - docker push $ECR_URL:latest
+
+      - echo Deploying Container via Terraform
+      - cd terraform/container
+      - terraform init -no-color
+      - terraform plan -no-color
+      - terraform apply -auto-approve -no-color
+      - terraform output -raw alb_url
+
+      - echo "Terraform completed on `date`" 
+
+artifacts:
+  files:
+    - '**/*'
