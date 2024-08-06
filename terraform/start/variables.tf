@@ -20,5 +20,5 @@ variable "allowed_cidr" {
 
 variable "base_cidr_block" {
   description = "Base CIDR block for VPC and Subnets"
-  default     = "10.0.0.0/24"
+  default     = "10.0.0.0/16"
 }

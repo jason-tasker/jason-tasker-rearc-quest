@@ -22,22 +22,32 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Modules
+# Configure Data for AZ
+data "aws_availability_zones" "available" {}
 
 # Setup AWS networking resources
 module "networking" {
-  source          = "./modules/networking"
-  aws_region      = var.aws_region
-  base_cidr_block = var.base_cidr_block
-  project_name    = var.project_name
-  project_owner   = var.project_owner
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+
+  name = "${var.project_name} VPC"
+  cidr = var.base_cidr_block
+
+  azs             = slice(data.aws_availability_zones.available.names, 0, 3)
+  private_subnets = [for k, v in local.azs : cidrsubnet(var.base_cidr_block, 8, k)]
+  public_subnets  = [for k, v in local.azs : cidrsubnet(var.base_cidr_block, 8, k + 4)]
+
+  enable_nat_gateway = true
+  single_nat_gateway = true
+
 }
 
-# Create ECR repo
-module "ecr" {
-  source          = "./modules/ecr"
-  aws_region      = var.aws_region
-  project_name    = var.project_name
-  project_owner   = var.project_owner
-  artifact_bucket = var.artifact_bucket
-} 
+# Setup ECR for project
+resource "aws_ecr_repository" "project_ecr" {
+  name                 = "${var.project_name}-ecr"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
