@@ -13,6 +13,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.16"
     }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2"
+    }
+    archive = {
+      source = "hashicorp/archive"
+      version = "2.5.0"
+    }
   }
 
   required_version = ">= 1.2.0"

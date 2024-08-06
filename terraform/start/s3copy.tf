@@ -1,4 +1,5 @@
 # Archive the project
+# tflint-ignore: terraform_unused_declarations
 data "archive_file" "project_start_zip" {
   type        = "zip"
   output_path = "../../project-start.zip"
